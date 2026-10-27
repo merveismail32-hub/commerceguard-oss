@@ -1,0 +1,30 @@
+[
+  {
+    "name": "10% commission on 100 TRY",
+    "kind": "commission",
+    "amountMinor": 10000,
+    "basisPoints": 1000,
+    "expectedMinor": 1000
+  },
+  {
+    "name": "payment is allowed",
+    "kind": "transition",
+    "from": "PENDING",
+    "to": "PAID",
+    "expected": true
+  },
+  {
+    "name": "replayed key is rejected",
+    "kind": "idempotency",
+    "keys": [
+      "abc",
+      "abc",
+      "xyz"
+    ],
+    "expectedAccepted": [
+      true,
+      false,
+      true
+    ]
+  }
+]
