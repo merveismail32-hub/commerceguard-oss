@@ -1,4 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { calculateCommission, canTransition, InMemoryIdempotencyGuard } from './index.ts';
 
 type Case = { name: string; kind: 'commission'; amountMinor: number; basisPoints: number; expectedMinor: number }
@@ -18,13 +20,13 @@ export function evaluate(cases: Case[]): Result[] {
   });
 }
 export function run(args: string[]): number {
-  if (args.length < 1 || args.length > 3 || (args.length === 3 && args[1] !== '--output')) {
+  if (!(args.length === 1 || (args.length === 3 && args[1] === '--output' && Boolean(args[2])))) {
     process.stderr.write('Usage: node --experimental-strip-types src/cli.ts cases.json [--output report.json]\n');
     return 2;
   }
   try {
     const parsed: unknown = JSON.parse(readFileSync(args[0], 'utf8'));
-    if (!Array.isArray(parsed) || parsed.some(x => !x || typeof x !== 'object' || typeof x.name !== 'string' || !['commission','transition','idempotency'].includes(x.kind))) throw new Error('Expected an array of named cases with supported kinds');
+    if (!Array.isArray(parsed) || parsed.some(x => !x || typeof x !== 'object' || typeof x.name !== 'string' || !['commission','transition','idempotency'].includes(x.kind) || (x.kind === 'commission' && (!Number.isSafeInteger(x.amountMinor) || !Number.isSafeInteger(x.basisPoints) || !Number.isSafeInteger(x.expectedMinor))) || (x.kind === 'transition' && (!['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.from) || !['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.to) || typeof x.expected !== 'boolean')) || (x.kind === 'idempotency' && (!Array.isArray(x.keys) || !x.keys.every((k: unknown) => typeof k === 'string') || !Array.isArray(x.expectedAccepted) || !x.expectedAccepted.every((v: unknown) => typeof v === 'boolean'))))) throw new Error('Invalid case schema');
     const results = evaluate(parsed as Case[]);
     const report = { total: results.length, passed: results.filter(r => r.passed).length, failed: results.filter(r => !r.passed).length, results };
     const output = JSON.stringify(report, null, 2) + '\n';
@@ -33,4 +35,4 @@ export function run(args: string[]): number {
     return report.failed ? 1 : 0;
   } catch (error) { process.stderr.write(String(error) + '\n'); return 2; }
 }
-if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) process.exitCode = run(process.argv.slice(2));
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) process.exitCode = run(process.argv.slice(2));
