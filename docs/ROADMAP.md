@@ -8,8 +8,8 @@
 - CI checks and examples
 
 ## Future
-- Strong schema validation and bounded input handling
-- Decimal-safe commission calculations for large amounts
+- Additional schema validation, streaming/size-bounded fixture handling (initial limits added)
+- Further currency/rounding policies (BigInt-based calculation implemented)
 - Property-based tests and failure injection
 - Persistent and concurrent idempotency contract test adapters
 - Published package and community feedback
