@@ -4,8 +4,9 @@ This project is an early prototype. Do not claim production payment or distribut
 
 ## Before v0.1.0 release
 
-- [ ] Confirm all GitHub Actions matrix jobs are green (Node 22/24; Linux/Windows)
+- [ ] Confirm all GitHub Actions matrix jobs are green (Node 22/24; Linux/Windows); review each job, not only the overall run
 - [ ] Inspect `npm pack --dry-run --json` output and ensure no private files are included
+- [ ] Verify Windows CLI integration tests pass with native file paths
 - [ ] Check CLI sample: `node bin/commerceguard.js examples/cases.json`
 - [ ] Verify README usage matches packaged files
 - [ ] Review MIT license and security reporting instructions
