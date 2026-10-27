@@ -18,6 +18,7 @@ Requires Node.js 22.6+.
 
 ```sh
 npm test
+node bin/commerceguard.js examples/cases.json
 node --experimental-strip-types src/cli.ts examples/cases.json
 node --experimental-strip-types src/cli.ts examples/cases.json --output report.json
 ```
@@ -28,11 +29,13 @@ node --experimental-strip-types src/cli.ts examples/cases.json --output report.j
 {"name":"10% commission","kind":"commission","amountMinor":10000,"basisPoints":1000,"expectedMinor":1000}
 ```
 
+The `commerceguard` executable is declared in package.json for future packaging. The package is currently private and **not published to npm**. Run `node bin/commerceguard.js` from the repository root for now.
+
 CLI accepts a JSON array of cases. Exit code 0 means all expectations matched, 1 means at least one mismatch, and 2 indicates invalid input or execution failure.
 
 ## Important limitations
 
-This is an early prototype, **not** a payment processor, fraud detector, or production idempotency solution. The in-memory guard cannot guarantee correctness across restarts, multiple processes, or concurrent distributed workers. Inputs should be trusted test fixtures; stronger validation and large-number safety are planned.
+This is an early prototype, **not** a payment processor, fraud detector, or production idempotency solution. The in-memory guard cannot guarantee correctness across restarts, multiple processes, or concurrent distributed workers. Inputs should be trusted test fixtures; fixture size limits and BigInt-based integer arithmetic are implemented, but more robust schema validation and domain-specific rounding policies remain future work.
 
 ## Contributing
 
