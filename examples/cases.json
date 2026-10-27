@@ -26,5 +26,24 @@
       false,
       true
     ]
+  },
+  {
+    "name": "settlement reconciles after refund",
+    "kind": "reconciliation",
+    "entries": [
+      {
+        "id": "charge-1",
+        "kind": "charge",
+        "amountMinor": 10000
+      },
+      {
+        "id": "refund-1",
+        "kind": "refund",
+        "amountMinor": 2500
+      }
+    ],
+    "actualNetMinor": 7500,
+    "expectedMatched": true,
+    "expectedDifferenceMinor": 0
   }
 ]
