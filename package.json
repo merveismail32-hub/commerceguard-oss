@@ -1,0 +1,13 @@
+{
+  "name": "commerceguard-oss",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dependency-free marketplace integrity testing primitives",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  }
+}
