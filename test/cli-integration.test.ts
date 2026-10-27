@@ -4,8 +4,9 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const entry = new URL('../src/cli.ts', import.meta.url).pathname;
+const entry = fileURLToPath(new URL('../src/cli.ts', import.meta.url));
 function invoke(value: unknown, output = false) {
   const dir = mkdtempSync(join(tmpdir(), 'commerceguard-'));
   try {
