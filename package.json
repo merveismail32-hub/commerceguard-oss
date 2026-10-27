@@ -4,10 +4,8 @@
   "private": true,
   "type": "module",
   "description": "Dependency-free marketplace integrity testing primitives",
-  "engines": {
-    "node": ">=22.6"
-  },
-  "scripts": {
-    "test": "node --experimental-strip-types --test test/*.test.ts"
-  }
+  "engines": { "node": ">=22.6" },
+  "bin": { "commerceguard": "./bin/commerceguard.js" },
+  "files": ["bin/", "src/", "README.md", "LICENSE"],
+  "scripts": { "test": "node --experimental-strip-types --test test/*.test.ts" }
 }
