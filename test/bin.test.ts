@@ -11,7 +11,7 @@ test('CLI executable runs example fixture successfully', () => {
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.failed, 0);
-  assert.equal(report.passed, 3);
+  assert.equal(report.passed, 4);
 });
 test('CLI executable returns usage error for no args', () => {
   const result = spawnSync(process.execPath, [bin], { encoding: 'utf8' });
