@@ -66,3 +66,25 @@ test('CLI rejects malformed reconciliation fixture', () => {
   ], actualNetMinor: 0, expectedMatched: true, expectedDifferenceMinor: 0 }]);
   assert.equal(r.status, 2);
 });
+
+test('CLI rejects out-of-range commission rates before evaluation', () => {
+  const r = invoke([{ name: 'invalid rate', kind: 'commission', amountMinor: 100, basisPoints: 10001, expectedMinor: 100 }]);
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /Invalid case schema/);
+});
+test('CLI rejects blank reconciliation entry IDs', () => {
+  const r = invoke([{ name: 'blank id', kind: 'reconciliation', entries: [
+    { id: '   ', kind: 'charge', amountMinor: 100 }
+  ], actualNetMinor: 100, expectedMatched: true, expectedDifferenceMinor: 0 }]);
+  assert.equal(r.status, 2);
+});
+test('CLI rejects fixtures larger than one MiB', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'commerceguard-large-'));
+  try {
+    const input = join(dir, 'large.json');
+    writeFileSync(input, ' '.repeat(1024 * 1024 + 1));
+    const r = spawnSync(process.execPath, ['--experimental-strip-types', entry, input], { encoding: 'utf8' });
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /Fixture exceeds 1 MiB limit/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
