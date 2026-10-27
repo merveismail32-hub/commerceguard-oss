@@ -44,3 +44,25 @@ test('CLI rejects more than 1000 cases', () => {
   const r = invoke(Array.from({ length: 1001 }, (_, i) => ({ name: 'case' + i, kind: 'transition', from: 'PENDING', to: 'PAID', expected: true })));
   assert.equal(r.status, 2);
 });
+
+test('CLI verifies a balanced reconciliation fixture', () => {
+  const r = invoke([{ name: 'settlement', kind: 'reconciliation', entries: [
+    { id: 'charge-1', kind: 'charge', amountMinor: 10000 },
+    { id: 'refund-1', kind: 'refund', amountMinor: 2500 }
+  ], actualNetMinor: 7500, expectedMatched: true, expectedDifferenceMinor: 0 }]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(JSON.parse(r.stdout).passed, 1);
+});
+test('CLI reports reconciliation mismatch as a failed expectation', () => {
+  const r = invoke([{ name: 'settlement', kind: 'reconciliation', entries: [
+    { id: 'charge-1', kind: 'charge', amountMinor: 10000 }
+  ], actualNetMinor: 9900, expectedMatched: true, expectedDifferenceMinor: 0 }]);
+  assert.equal(r.status, 1);
+  assert.equal(JSON.parse(r.stdout).failed, 1);
+});
+test('CLI rejects malformed reconciliation fixture', () => {
+  const r = invoke([{ name: 'bad', kind: 'reconciliation', entries: [
+    { id: 'charge-1', kind: 'charge', amountMinor: -5 }
+  ], actualNetMinor: 0, expectedMatched: true, expectedDifferenceMinor: 0 }]);
+  assert.equal(r.status, 2);
+});
