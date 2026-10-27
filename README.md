@@ -32,9 +32,14 @@ node --experimental-strip-types src/cli.ts examples/cases.json --output report.j
 
 The `commerceguard` executable is declared in package.json for future packaging. The package is currently private and **not published to npm**. Run `node bin/commerceguard.js` from the repository root for now.
 
-CLI accepts a JSON array of cases. Exit code 0 means all expectations matched, 1 means at least one mismatch, and 2 indicates invalid input or execution failure.
+CLI accepts a JSON array of cases, including `reconciliation` fixtures with `entries`, `actualNetMinor`, `expectedMatched`, and `expectedDifferenceMinor`. Exit code 0 means all expectations matched, 1 means at least one mismatch, and 2 indicates invalid input or execution failure.
 
 ## Reconciliation example
+
+```json
+{"name":"settlement check","kind":"reconciliation","entries":[{"id":"charge-1","kind":"charge","amountMinor":10000},{"id":"refund-1","kind":"refund","amountMinor":2500}],"actualNetMinor":7500,"expectedMatched":true,"expectedDifferenceMinor":0}
+```
+
 
 The `reconcileLedger` function is available from `src/reconciliation.ts` for source-level use. It compares a synthetic charge/refund ledger with an independently supplied settled net amount, returning `matched` and a signed `differenceMinor`. All amounts use integer minor units. Duplicate entry IDs and unsafe integer sums are rejected. It does not connect to banks, payment providers, or accounting systems.
 
