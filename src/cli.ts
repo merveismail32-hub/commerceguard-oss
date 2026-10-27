@@ -19,14 +19,18 @@ export function evaluate(cases: Case[]): Result[] {
     } catch (error) { return { name: c.name, passed: false, error: error instanceof Error ? error.message : String(error) }; }
   });
 }
+const MAX_FIXTURE_BYTES = 1024 * 1024;
+const MAX_CASES = 1000;
 export function run(args: string[]): number {
   if (!(args.length === 1 || (args.length === 3 && args[1] === '--output' && Boolean(args[2])))) {
     process.stderr.write('Usage: node --experimental-strip-types src/cli.ts cases.json [--output report.json]\n');
     return 2;
   }
   try {
-    const parsed: unknown = JSON.parse(readFileSync(args[0], 'utf8'));
-    if (!Array.isArray(parsed) || parsed.some(x => !x || typeof x !== 'object' || typeof x.name !== 'string' || !['commission','transition','idempotency'].includes(x.kind) || (x.kind === 'commission' && (!Number.isSafeInteger(x.amountMinor) || !Number.isSafeInteger(x.basisPoints) || !Number.isSafeInteger(x.expectedMinor))) || (x.kind === 'transition' && (!['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.from) || !['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.to) || typeof x.expected !== 'boolean')) || (x.kind === 'idempotency' && (!Array.isArray(x.keys) || !x.keys.every((k: unknown) => typeof k === 'string') || !Array.isArray(x.expectedAccepted) || !x.expectedAccepted.every((v: unknown) => typeof v === 'boolean'))))) throw new Error('Invalid case schema');
+    const bytes = readFileSync(args[0]);
+    if (bytes.byteLength > MAX_FIXTURE_BYTES) throw new Error('Fixture exceeds 1 MiB limit');
+    const parsed: unknown = JSON.parse(bytes.toString('utf8'));
+    if (!Array.isArray(parsed) || parsed.length > MAX_CASES || parsed.some(x => !x || typeof x !== 'object' || typeof x.name !== 'string' || !x.name.trim() || x.name.length > 120 || !['commission','transition','idempotency'].includes(x.kind) || (x.kind === 'commission' && (!Number.isSafeInteger(x.amountMinor) || !Number.isSafeInteger(x.basisPoints) || !Number.isSafeInteger(x.expectedMinor))) || (x.kind === 'transition' && (!['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.from) || !['PENDING','PAID','FULFILLED','CANCELLED','REFUNDED'].includes(x.to) || typeof x.expected !== 'boolean')) || (x.kind === 'idempotency' && (!Array.isArray(x.keys) || !x.keys.every((k: unknown) => typeof k === 'string') || !Array.isArray(x.expectedAccepted) || x.keys.length > 10000 || x.keys.length !== x.expectedAccepted.length || !x.keys.every((k: string) => k.length > 0 && k.length <= 256) || !x.expectedAccepted.every((v: unknown) => typeof v === 'boolean'))))) throw new Error('Invalid case schema');
     const results = evaluate(parsed as Case[]);
     const report = { total: results.length, passed: results.filter(r => r.passed).length, failed: results.filter(r => !r.passed).length, results };
     const output = JSON.stringify(report, null, 2) + '\n';
