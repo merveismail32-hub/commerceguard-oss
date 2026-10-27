@@ -2,9 +2,9 @@
 export function calculateCommission(amountMinor: number, basisPoints: number): number {
   if (!Number.isSafeInteger(amountMinor) || amountMinor < 0) throw new RangeError('Invalid amount');
   if (!Number.isSafeInteger(basisPoints) || basisPoints < 0 || basisPoints > 10000) throw new RangeError('Invalid rate');
-  const result = Math.round(amountMinor * basisPoints / 10000);
-  if (!Number.isSafeInteger(result)) throw new RangeError('Result out of range');
-  return result;
+  const result = (BigInt(amountMinor) * BigInt(basisPoints) + 5000n) / 10000n;
+  if (result > BigInt(Number.MAX_SAFE_INTEGER)) throw new RangeError('Result out of range');
+  return Number(result);
 }
 export type OrderState = 'PENDING' | 'PAID' | 'FULFILLED' | 'CANCELLED' | 'REFUNDED';
 const transitions: Record<OrderState, readonly OrderState[]> = {
